@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+# require "stump/cli"
+
+require "thor"
+require "wordmove/generators/movefile"
+require "wordmove/deployer/base"
+ 
+class Stump < Thor
+  
+  desc "init NAME", "Create new project NAME"
+  def init(name)
+
+    puts "Creating project..."
+    wp_core = File.expand_path("../../lib/wp", __FILE__)
+    new_project_dir = "#{Dir.pwd}/#{name}"
+    new_project_theme = "#{new_project_dir}/wp-content/themes/#{name}"
+
+    # copy wp core with stump theme to current dir
+    FileUtils.cp_r wp_core, new_project_dir
+
+    # change theme dir to project NAME
+    puts "Changing theme name..."
+    FileUtils.mv "#{new_project_dir}/wp-content/themes/stump", new_project_theme
+
+    # cd into new theme dir
+    FileUtils.cd new_project_dir
+
+    # update style.css with project NAME
+    File.write( "#{new_project_theme}/style.css", theme_style(name) )
+
+    # initialize Wordmove
+    puts "Initializing Wordmove..."
+    Wordmove::Generators::Movefile.start
+
+    puts "Complete!"
+    puts Dir.pwd
+  end
+
+  no_tasks do
+    def theme_style(name)
+      <<-END.gsub(/^ {6}/, '')
+        /*
+        Theme Name:         #{name}
+        Theme URI:          
+        Description:        
+        Version:            0.0.1
+        Author:             
+        Author URI:         
+
+        License:            MIT License
+        License URI:        http://opensource.org/licenses/MIT
+        */
+      END
+    end
+  end
+
+end
+
+Stump.start()
