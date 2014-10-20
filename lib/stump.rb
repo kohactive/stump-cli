@@ -1,5 +1,5 @@
-require "stump/version"
+require "stump-cli/version"
 
-module Stump
+module StumpCLI
 
 end
