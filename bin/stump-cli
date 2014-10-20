@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
-# require "stump/cli"
 
 require "thor"
 require "wordmove/generators/movefile"
 require "wordmove/deployer/base"
  
-class Stump < Thor
+class StumpCLI < Thor
   
   desc "init NAME", "Create new project NAME"
   def init(name)
@@ -56,4 +55,4 @@ class Stump < Thor
 
 end
 
-Stump.start()
+StumpCLI.start

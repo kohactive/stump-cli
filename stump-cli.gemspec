@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'stump/version'
+require 'stump-cli/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "stump-cli"
-  spec.version       = Stump::VERSION
+  spec.version       = StumpCLI::VERSION
   spec.authors       = ["Andy Richardson"]
   spec.email         = ["andy@kohactive.com"]
   spec.summary       = "Initialize a WordPress project based on the Stump theme"
   spec.description   = ""
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/kohactive/stump-cli"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -21,5 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake", "~> 10.0"
 
+  spec.add_dependency "thor", '~> 0.19', '>= 0.19.1'
   spec.add_dependency "wordmove", "~> 1.2.0", '>= 1.2.0'
 end
