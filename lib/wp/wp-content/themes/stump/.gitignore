@@ -1,0 +1,12 @@
+node_modules/
+wp-content/themes/unyson/assets/js/vendor/
+.sass-cache
+main.min.css
+main.min.css.map
+Movefile
+wp-content/*.sql
+.DS_Store
+site.js
+wp-content/themes/unyson/**/*.min.js
+wp-config.php
+uploads/
