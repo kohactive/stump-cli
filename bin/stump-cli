@@ -3,6 +3,7 @@
 require "thor"
 require "wordmove/generators/movefile"
 require "wordmove/deployer/base"
+require "tilt/erb"
  
 class StumpCLI < Thor
   
@@ -16,6 +17,12 @@ class StumpCLI < Thor
 
     # copy wp core with stump theme to current dir
     FileUtils.cp_r wp_core, new_project_dir
+
+    # render gitignore for project
+    gitignore = Tilt::ERBTemplate.new("#{new_project_dir}/.gitignore.erb")
+    new_gitignore = gitignore.render { name }
+    File.write( "#{new_project_dir}/.gitignore", new_gitignore )
+    FileUtils.remove_file( "#{new_project_dir}/.gitignore.erb" )
 
     # change theme dir to project NAME
     puts "Changing theme name..."
