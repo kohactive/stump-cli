@@ -1,18 +1,22 @@
 # Stump CLI
 
-Initialize a WordPress project based on the Stump theme
+Initialize a WordPress project based on the [Stump](https://github.com/kohactive/stump) theme
 
 ## Installation
 
-`$ gem install stump-cli --no-rdoc --no-ri`
+`$ gem install stump-cli`
 
 ## Usage
 
-`stump-cli init NAME`
+`stump-cli init NAME`  
+_See the [Stump repo](https://github.com/kohactive/stump) for theme usage_
 
 ## TODO
-* pull latest WordPress release on init
-* pull Stump from https://github.com/kohactive/stump on init
+* [prompt user if dir already exists where they are trying to init](https://github.com/kohactive/stump-cli/issues/10)
+* [remove default themes](https://github.com/kohactive/stump-cli/issues/11)
+* [install plugins (acf, ?)](https://github.com/kohactive/stump-cli/issues/12)
+* [add link to theme usage instructions in output](https://github.com/kohactive/stump-cli/issues/13)
+* [run `npm install` and `grunt`?](https://github.com/kohactive/stump-cli/issues/14)
 
 ## Contributing
 

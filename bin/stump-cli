@@ -1,63 +1,106 @@
 #!/usr/bin/env ruby
 
+require "open-uri"
+require "tilt/erb"
 require "thor"
 require "wordmove/generators/movefile"
 require "wordmove/deployer/base"
-require "tilt/erb"
+require "zip"
  
 class StumpCLI < Thor
   
   desc "init NAME", "Create new project NAME"
   def init(name)
 
-    puts "Creating project..."
-    wp_core = File.expand_path("../../lib/wp", __FILE__)
     new_project_dir = "#{Dir.pwd}/#{name}"
     new_project_theme = "#{new_project_dir}/wp-content/themes/#{name}"
 
-    # copy wp core with stump theme to current dir
-    FileUtils.cp_r wp_core, new_project_dir
+    puts "Downloading latest stable WordPress zip..."
+    
+    # TODO: need to check if dir exists
+    # if it does, prompt user to overwrite or cancel
+    FileUtils.mkdir new_project_dir
+    wp_zip = File.new("#{new_project_dir}/wp.zip", "w")
+    open(wp_zip, 'wb') do |wp|
+      wp << open('https://wordpress.org/latest.zip').read
+    end
+
+    puts "Extracting WordPress zip..."
+    Zip::File.open(wp_zip) do |zip_file|
+      zip_file.each do |entry|
+        entry.extract("#{new_project_dir}/#{entry.name}")
+      end
+    end
+    
+    # remove wp zip file
+    FileUtils.rm wp_zip
+
+    # pull everything up a level from the extracted "wordpress" dir
+    Dir.foreach("#{new_project_dir}/wordpress") do |item|
+      next if item == '.' or item == '..'
+      FileUtils.mv "#{new_project_dir}/wordpress/#{item}", "#{new_project_dir}/#{item}"
+    end
+
+    # remove leftover dir from unzipping
+    FileUtils.rmdir "#{new_project_dir}/wordpress"
+
+    # TODO: remove default themes
+    # doesn't work for whatever reason...
+    # Dir.foreach("#{new_project_dir}/wp-content/themes") do |item|
+    #   next if item == '.' or item == '..'
+    #   puts item
+    #   puts File.directory?(item)
+    #   puts "::::"
+    #   FileUtils.rm_rf "#{new_project_dir}/wp-content/themes/#{item}" if File.directory?(item)
+    # end
+
+    puts "Downloading latest stable Stump zip..."
+    stump_zip = File.new("#{new_project_dir}/stump.zip", "w")
+    open(stump_zip, 'wb') do |wp|
+      wp << open('https://github.com/kohactive/stump/archive/master.zip').read
+    end
+
+    puts "Extracting Stump zip..."
+    Zip::File.open(stump_zip) do |zip_file|
+      zip_file.each do |entry|
+        entry.extract("#{new_project_dir}/wp-content/themes/#{entry.name}")
+      end
+    end
+
+    # remove .gitignore used for theme repo
+    # we'll make our own for the new project below
+    FileUtils.rm "#{new_project_dir}/wp-content/themes/stump-master/.gitignore"
+    
+    # remove stump zip file
+    FileUtils.rm stump_zip
+
+    # change theme dir to project NAME
+    puts "Changing theme name..."
+    FileUtils.mv "#{new_project_dir}/wp-content/themes/stump-master", new_project_theme
+
+    # render style.css
+    style_template = File.expand_path("../../lib/style.erb", __FILE__)
+    FileUtils.cp style_template, new_project_dir
+    style = Tilt::ERBTemplate.new("#{new_project_dir}/style.erb")
+    new_style = style.render { name }
+    File.write( "#{new_project_dir}/wp-content/themes/#{name}/style.css", new_style )
+    FileUtils.remove_file( "#{new_project_dir}/style.erb" )
 
     # render gitignore for project
+    gitignore_template = File.expand_path("../../lib/.gitignore.erb", __FILE__)
+    FileUtils.cp gitignore_template, new_project_dir
     gitignore = Tilt::ERBTemplate.new("#{new_project_dir}/.gitignore.erb")
     new_gitignore = gitignore.render { name }
     File.write( "#{new_project_dir}/.gitignore", new_gitignore )
     FileUtils.remove_file( "#{new_project_dir}/.gitignore.erb" )
 
-    # change theme dir to project NAME
-    puts "Changing theme name..."
-    FileUtils.mv "#{new_project_dir}/wp-content/themes/stump", new_project_theme
-
-    # cd into new theme dir
-    FileUtils.cd new_project_dir
-
-    # update style.css with project NAME
-    File.write( "#{new_project_theme}/style.css", theme_style(name) )
-
     # initialize Wordmove
     puts "Initializing Wordmove..."
+    FileUtils.cd new_project_dir
     Wordmove::Generators::Movefile.start
 
     puts "Complete!"
     puts Dir.pwd
-  end
-
-  no_tasks do
-    def theme_style(name)
-      <<-END.gsub(/^ {6}/, '')
-        /*
-        Theme Name:         #{name}
-        Theme URI:          
-        Description:        
-        Version:            0.0.1
-        Author:             
-        Author URI:         
-
-        License:            MIT License
-        License URI:        http://opensource.org/licenses/MIT
-        */
-      END
-    end
   end
 
 end

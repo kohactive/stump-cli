@@ -16,3 +16,4 @@ mkmf.log
 .sass-cache/
 node_modules/
 *.gem
+.ruby-version
